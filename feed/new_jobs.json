@@ -1,6 +1,21 @@
 {
  "jobs": [
   {
+   "key": "ashby:iceye:b6c72b2a-d448-4722-9ab8-4d608e3f7dd6",
+   "source": "ashby",
+   "board": "iceye",
+   "title": "Engineering Operations Coordinator",
+   "company": "iceye",
+   "location": "Warsaw",
+   "url": "https://jobs.ashbyhq.com/iceye/b6c72b2a-d448-4722-9ab8-4d608e3f7dd6",
+   "remote_flag": true,
+   "posted_at": "2026-11-04T15:22:06Z",
+   "date_kind": "published_at",
+   "area": "Remote",
+   "first_seen": "2026-11-04T19:42:53Z",
+   "first_scan": false
+  },
+  {
    "key": "greenhouse:houserx:4750510005",
    "source": "greenhouse",
    "board": "houserx",
