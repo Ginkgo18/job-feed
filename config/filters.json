@@ -96,8 +96,9 @@
     "manhattan",
     "jersey city",
     "hoboken",
-    "new jersey",
-    "nj"
+    "hudson yards",
+    "wall street",
+    "brookfield place"
   ],
   "location_remote": [
     "remote"
@@ -132,5 +133,41 @@
     "romania",
     "ukraine",
     "south africa"
+  ],
+  "location_nyc_sure": [
+    "new york city",
+    "new york, ny",
+    "nyc",
+    "manhattan",
+    "jersey city",
+    "hoboken"
+  ],
+  "location_exclude": [
+    "rensselaer",
+    "albany",
+    "buffalo",
+    "rochester",
+    "syracuse",
+    "ithaca",
+    "schenectady",
+    "utica",
+    "binghamton",
+    "poughkeepsie",
+    "white plains",
+    "westchester",
+    "long island",
+    "upstate",
+    "rye brook",
+    "armonk",
+    "tarrytown",
+    "melville",
+    "hauppauge"
+  ],
+  "workday_searches": [
+    "project coordinator",
+    "project manager",
+    "implementation coordinator",
+    "operations coordinator",
+    "operations associate"
   ]
 }

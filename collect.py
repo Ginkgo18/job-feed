@@ -10,6 +10,8 @@ COMPANIES = json.loads((ROOT / "config/companies.json").read_text())
 SEEN_FILE, FEED_FILE, STATUS_FILE = (ROOT / "feed" / n for n in ("seen.json", "new_jobs.json", "status.json"))
 NOW = datetime.now(timezone.utc)
 KEEP_DAYS, FIRST_SCAN_DAYS, MAX_AGE_DAYS = 7, 3, 14
+DEADLINE = time.time() + 20 * 60
+DEAD_AFTER = 3
 
 def iso(d): return d.strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -56,7 +58,50 @@ def ashby(slug):
                        j.get("publishedAt"), "published_at", j.get("isRemote")))
     return out
 
-FETCH = {"greenhouse": greenhouse, "lever": lever, "ashby": ashby}
+def workday_date(label):
+    t = (label or "").lower()
+    if "today" in t: return NOW
+    if "yesterday" in t: return NOW - timedelta(days=1)
+    if "30+" in t: return NOW - timedelta(days=45)
+    m = re.search(r"(\d+)\s+day", t)
+    return NOW - timedelta(days=int(m.group(1))) if m else None
+
+def post_json(url, body, origin):
+    req = urllib.request.Request(url, data=json.dumps(body).encode(), method="POST", headers={
+        "User-Agent": "job-feed/1.0", "Accept": "application/json", "Content-Type": "application/json", "Origin": origin})
+    with urllib.request.urlopen(req, timeout=20) as r:
+        return json.load(r)
+
+def workday(slug):
+    tenant, dc, site = slug.split("|")
+    base = f"https://{tenant}.{dc}.myworkdayjobs.com"
+    api = f"{base}/wday/cxs/{tenant}/{site}"
+    found = {}
+    for query in FILTERS["workday_searches"]:
+        data = post_json(api + "/jobs", {"appliedFacets": {}, "limit": 20, "offset": 0, "searchText": query}, base)
+        for p in data.get("jobPostings", []):
+            if p.get("externalPath"): found[p["externalPath"]] = p
+        if not data.get("total"): break
+    out = []
+    for path, p in found.items():
+        title, loc, posted = p.get("title") or "", p.get("locationsText") or "", workday_date(p.get("postedOn"))
+        key = f"workday:{slug}:{path}"
+        kind, company = "workday_label", tenant
+        hidden = bool(re.fullmatch(r"\d+ locations?", loc.lower()))
+        if title_match(title) and key not in SEEN_KEYS and posted and NOW - posted <= timedelta(days=7) and (hidden or area({"location": loc, "remote_flag": False})):
+            try:
+                info = get(api + path).get("jobPostingInfo", {})
+                extra = info.get("additionalLocations") or []
+                loc = "; ".join(x for x in [info.get("location")] + extra if x) or loc
+                if info.get("remoteType"): loc += f"; {info['remoteType']}"
+                if info.get("startDate"): posted, kind = parse(info["startDate"]), "start_date"
+            except Exception:
+                pass
+        out.append(job("workday", slug, path, title, company, loc, f"{base}/{site}{path}", iso(posted) if posted else None, kind))
+    return out
+
+FETCH = {"greenhouse": greenhouse, "lever": lever, "ashby": ashby, "workday": workday}
+SEEN_KEYS = set()
 
 def has(text, terms):
     return any(re.search(r"(?<![a-z0-9])" + re.escape(t.strip()) + r"(?![a-z0-9])", text) for t in terms)
@@ -67,13 +112,16 @@ def title_match(title):
 
 def area(j):
     loc = j["location"].lower()
-    if has(loc, FILTERS["location_local"]): return "New York area"
+    if has(loc, FILTERS["location_local"]) and (has(loc, FILTERS["location_nyc_sure"]) or not has(loc, FILTERS["location_exclude"])):
+        return "New York area"
     us_or_blank = not loc or has(loc, ["remote", "us", "usa", "united states"])
     if ((j["remote_flag"] and us_or_blank) or has(loc, FILTERS["location_remote"])) and not has(loc, FILTERS["remote_exclude"]): return "Remote"
     return None
 
 def scan(item):
     source, slug = item
+    if source == "workday" and time.time() > DEADLINE:
+        return source, slug, [], "skipped"
     try:
         return source, slug, FETCH[source](slug), None
     except urllib.error.HTTPError as e:
@@ -89,15 +137,31 @@ def main():
     seen = load(SEEN_FILE, {"boards": [], "jobs": {}})
     feed = load(FEED_FILE, {"jobs": []})
     known_boards = set(seen["boards"])
-    items = [(s, b) for s, boards in COMPANIES.items() for b in boards]
+    dead = seen.get("dead", {})
+    SEEN_KEYS.update(seen["jobs"])
+    live = lambda s, b: dead.get(f"{s}:{b}", 0) < DEAD_AFTER
+    items = [(s, b) for s, boards in COMPANIES.items() if s != "workday" for b in boards if live(s, b)]
+    wd = [("workday", b) for b in COMPANIES.get("workday", []) if live("workday", b)]
+    cursor = seen.get("workday_cursor", 0) % max(len(wd), 1)
+    wd = wd[cursor:] + wd[:cursor]
     scanned, failed, total, matched, added = {k: 0 for k in FETCH}, {}, 0, 0, []
     with cf.ThreadPoolExecutor(max_workers=48) as pool:
         results = list(pool.map(scan, items))
+    fast_seconds = round(time.time() - start, 1)
+    with cf.ThreadPoolExecutor(max_workers=24) as pool:
+        wd_results = list(pool.map(scan, wd))
+    results += wd_results
+    wd_done = sum(1 for r in wd_results if r[3] != "skipped")
+    seen["workday_cursor"] = (cursor + wd_done) % max(len(wd), 1)
     for source, slug, jobs, err in results:
         board = f"{source}:{slug}"
+        if err == "skipped":
+            continue
         if err:
             failed[err] = failed.get(err, 0) + 1
+            if err == "HTTP 404": dead[board] = dead.get(board, 0) + 1
             continue
+        dead.pop(board, None)
         scanned[source] += 1
         total += len(jobs)
         first_scan = board not in known_boards
@@ -114,13 +178,14 @@ def main():
             if first_scan and not (posted and NOW - posted <= timedelta(days=FIRST_SCAN_DAYS)): continue
             added.append({**j, "area": a, "first_seen": iso(NOW), "first_scan": first_scan})
     cutoff = NOW - timedelta(days=KEEP_DAYS)
-    jobs = [j for j in feed["jobs"] if parse(j["first_seen"]) >= cutoff] + added
+    jobs = [j for j in feed["jobs"] if parse(j["first_seen"]) >= cutoff and area(j)] + added
     jobs.sort(key=lambda j: (j["first_seen"], j["posted_at"] or ""), reverse=True)
     seen["boards"] = sorted(known_boards)
+    seen["dead"] = dead
     SEEN_FILE.parent.mkdir(exist_ok=True)
     SEEN_FILE.write_text(json.dumps(seen, indent=0, sort_keys=True))
     FEED_FILE.write_text(json.dumps({"jobs": jobs}, indent=1))
-    STATUS_FILE.write_text(json.dumps({"last_run": iso(NOW), "seconds": round(time.time() - start, 1), "boards_listed": len(items),
+    STATUS_FILE.write_text(json.dumps({"last_run": iso(NOW), "seconds": round(time.time() - start, 1), "boards_listed": sum(len(v) for v in COMPANIES.values()), "boards_dead_skipped": sum(1 for v in dead.values() if v >= DEAD_AFTER), "fast_boards_seconds": fast_seconds, "workday_boards_this_run": wd_done, "workday_boards_total": len(wd),
         "boards_scanned": scanned, "boards_failed": failed, "jobs_read": total, "jobs_matching_filters": matched,
         "new_this_run": len(added), "in_feed": len(jobs)}, indent=1))
     print(STATUS_FILE.read_text())
