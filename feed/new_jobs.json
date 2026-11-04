@@ -1,0 +1,64 @@
+{
+ "jobs": [
+  {
+   "key": "greenhouse:houserx:4750510005",
+   "source": "greenhouse",
+   "board": "houserx",
+   "title": "Shared Services Project Manager",
+   "company": "House Rx",
+   "location": "Remote, US",
+   "url": "https://www.houserx.com/careers?gh_jid=4750510005",
+   "remote_flag": false,
+   "posted_at": "2026-11-04T06:00:00Z",
+   "date_kind": "first_published",
+   "area": "Remote",
+   "first_seen": "2026-11-04T19:28:36Z",
+   "first_scan": true
+  },
+  {
+   "key": "ashby:matx:382afc93-357a-4ead-b8cf-607c32399485",
+   "source": "ashby",
+   "board": "matx",
+   "title": "Executive Operations Coordinator, Office of the COO",
+   "company": "matx",
+   "location": "Mountain View (HQ) or Remote",
+   "url": "https://jobs.ashbyhq.com/matx/382afc93-357a-4ead-b8cf-607c32399485",
+   "remote_flag": true,
+   "posted_at": "2026-11-02T22:14:05Z",
+   "date_kind": "published_at",
+   "area": "Remote",
+   "first_seen": "2026-11-04T19:28:36Z",
+   "first_scan": true
+  },
+  {
+   "key": "ashby:color-health:ff23b3fa-bbba-471f-b703-c0f99395b289",
+   "source": "ashby",
+   "board": "color-health",
+   "title": "Care Operations Associate",
+   "company": "color-health",
+   "location": "Remote, USA",
+   "url": "https://jobs.ashbyhq.com/color-health/ff23b3fa-bbba-471f-b703-c0f99395b289",
+   "remote_flag": true,
+   "posted_at": "2026-11-02T21:07:29Z",
+   "date_kind": "published_at",
+   "area": "Remote",
+   "first_seen": "2026-11-04T19:28:36Z",
+   "first_scan": true
+  },
+  {
+   "key": "greenhouse:coast:6240359004",
+   "source": "greenhouse",
+   "board": "coast",
+   "title": "Business Operations Associate",
+   "company": "Coast",
+   "location": "New York, NY",
+   "url": "https://job-boards.greenhouse.io/coast/jobs/6240359004",
+   "remote_flag": false,
+   "posted_at": "2026-11-02T02:31:45Z",
+   "date_kind": "first_published",
+   "area": "New York area",
+   "first_seen": "2026-11-04T19:28:36Z",
+   "first_scan": true
+  }
+ ]
+}
