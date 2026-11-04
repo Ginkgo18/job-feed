@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Collects new matching jobs from public Greenhouse, Lever and Ashby job boards. No AI, no personal data."""
-import concurrent.futures as cf, json, re, sys, time, urllib.request, urllib.error
+import concurrent.futures as cf, html, json, re, sys, time, urllib.request, urllib.error
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -102,6 +102,35 @@ def workday(slug):
         out.append(job("workday", slug, path, title, company, loc, f"{base}/{site}{path}", iso(posted) if posted else None, kind))
     return out
 
+def clean(text):
+    text = html.unescape(html.unescape(text or ""))
+    text = re.sub(r"<(br|/p|/li|/h\d|/div)[^>]*>", "\n", text, flags=re.I)
+    text = re.sub(r"<[^>]+>", " ", text)
+    return re.sub(r"[ \t]+", " ", re.sub(r"\n\s*\n+", "\n", text)).strip()[:7000]
+
+def description(j):
+    """Reads the public job text so screening does not depend on opening the page."""
+    source, slug, jid = j["key"].split(":", 2)
+    try:
+        if source == "greenhouse":
+            return clean(get(f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs/{jid}").get("content"))
+        if source == "lever":
+            p = get(f"https://api.lever.co/v0/postings/{slug}/{jid}?mode=json")
+            parts = [p.get("descriptionPlain"), p.get("additionalPlain")]
+            for l in p.get("lists") or []:
+                parts += [l.get("text"), l.get("content")]
+            return clean("\n".join(x for x in parts if x))
+        if source == "ashby":
+            for p in get(f"https://api.ashbyhq.com/posting-api/job-board/{slug}").get("jobs", []):
+                if p.get("id") == jid:
+                    return clean(p.get("descriptionPlain") or p.get("descriptionHtml"))
+            return None
+        if source == "workday":
+            tenant, dc, site = slug.split("|")
+            return clean(get(f"https://{tenant}.{dc}.myworkdayjobs.com/wday/cxs/{tenant}/{site}{jid}").get("jobPostingInfo", {}).get("jobDescription"))
+    except Exception:
+        return None
+
 FETCH = {"greenhouse": greenhouse, "lever": lever, "ashby": ashby, "workday": workday}
 SEEN_KEYS = set()
 
@@ -179,6 +208,10 @@ def main():
             added.append({**j, "area": a, "first_seen": iso(NOW), "first_scan": first_scan})
     cutoff = NOW - timedelta(days=KEEP_DAYS)
     jobs = [j for j in feed["jobs"] if parse(j["first_seen"]) >= cutoff and area(j)] + added
+    missing = [j for j in jobs if not j.get("description")]
+    with cf.ThreadPoolExecutor(max_workers=6) as pool:
+        for j, text in zip(missing, pool.map(description, missing)):
+            if text: j["description"] = text
     jobs.sort(key=lambda j: (j["first_seen"], j["posted_at"] or ""), reverse=True)
     seen["boards"] = sorted(known_boards)
     seen["dead"] = dead
@@ -187,7 +220,7 @@ def main():
     FEED_FILE.write_text(json.dumps({"jobs": jobs}, indent=1))
     STATUS_FILE.write_text(json.dumps({"last_run": iso(NOW), "seconds": round(time.time() - start, 1), "mode": MODE, "boards_listed": sum(len(COMPANIES.get(k, [])) for k in wanted), "boards_dead_skipped": sum(1 for v in dead.values() if v >= DEAD_AFTER), "boards_tried": done,
         "boards_scanned": scanned, "boards_failed": failed, "jobs_read": total, "jobs_matching_filters": matched,
-        "new_this_run": len(added), "in_feed": len(jobs)}, indent=1))
+        "new_this_run": len(added), "with_description": sum(1 for j in jobs if j.get("description")), "in_feed": len(jobs)}, indent=1))
     print(STATUS_FILE.read_text())
 
 if __name__ == "__main__":
