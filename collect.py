@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """Collects new matching jobs from public Greenhouse, Lever and Ashby job boards. No AI, no personal data."""
-import concurrent.futures as cf, json, re, time, urllib.request, urllib.error
+import concurrent.futures as cf, json, re, sys, time, urllib.request, urllib.error
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).parent
 FILTERS = json.loads((ROOT / "config/filters.json").read_text())
 COMPANIES = json.loads((ROOT / "config/companies.json").read_text())
-SEEN_FILE, FEED_FILE, STATUS_FILE = (ROOT / "feed" / n for n in ("seen.json", "new_jobs.json", "status.json"))
+MODE = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] == "workday" else "fast"
+SUFFIX = "_workday" if MODE == "workday" else ""
+SEEN_FILE, FEED_FILE, STATUS_FILE = (ROOT / "feed" / f"{n}{SUFFIX}.json" for n in ("seen", "new_jobs", "status"))
 NOW = datetime.now(timezone.utc)
 KEEP_DAYS, FIRST_SCAN_DAYS, MAX_AGE_DAYS = 7, 3, 14
-DEADLINE = time.time() + 12 * 60
+DEADLINE = time.time() + 75 * 60
 DEAD_AFTER = 3
 
 def iso(d): return d.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -142,19 +144,15 @@ def main():
     dead = seen.get("dead", {})
     SEEN_KEYS.update(seen["jobs"])
     live = lambda s, b: dead.get(f"{s}:{b}", 0) < DEAD_AFTER
-    items = [(s, b) for s, boards in COMPANIES.items() if s != "workday" for b in boards if live(s, b)]
-    wd = [("workday", b) for b in COMPANIES.get("workday", []) if live("workday", b)]
-    cursor = seen.get("workday_cursor", 0) % max(len(wd), 1)
-    wd = wd[cursor:] + wd[:cursor]
-    scanned, failed, total, matched, added = {k: 0 for k in FETCH}, {}, 0, 0, []
-    with cf.ThreadPoolExecutor(max_workers=48) as pool:
+    wanted = ["workday"] if MODE == "workday" else ["greenhouse", "lever", "ashby"]
+    items = [(s, b) for s in wanted for b in COMPANIES.get(s, []) if live(s, b)]
+    cursor = seen.get("cursor", 0) % max(len(items), 1)
+    items = items[cursor:] + items[:cursor]
+    scanned, failed, total, matched, added = {k: 0 for k in wanted}, {}, 0, 0, []
+    with cf.ThreadPoolExecutor(max_workers=6 if MODE == "workday" else 48) as pool:
         results = list(pool.map(scan, items))
-    fast_seconds = round(time.time() - start, 1)
-    with cf.ThreadPoolExecutor(max_workers=6) as pool:
-        wd_results = list(pool.map(scan, wd))
-    results += wd_results
-    wd_done = sum(1 for r in wd_results if r[3] != "skipped")
-    seen["workday_cursor"] = (cursor + wd_done) % max(len(wd), 1)
+    done = sum(1 for r in results if r[3] != "skipped")
+    seen["cursor"] = (cursor + done) % max(len(items), 1)
     for source, slug, jobs, err in results:
         board = f"{source}:{slug}"
         if err == "skipped":
@@ -187,7 +185,7 @@ def main():
     SEEN_FILE.parent.mkdir(exist_ok=True)
     SEEN_FILE.write_text(json.dumps(seen, indent=0, sort_keys=True))
     FEED_FILE.write_text(json.dumps({"jobs": jobs}, indent=1))
-    STATUS_FILE.write_text(json.dumps({"last_run": iso(NOW), "seconds": round(time.time() - start, 1), "boards_listed": sum(len(v) for v in COMPANIES.values()), "boards_dead_skipped": sum(1 for v in dead.values() if v >= DEAD_AFTER), "fast_boards_seconds": fast_seconds, "workday_boards_this_run": wd_done, "workday_boards_total": len(wd),
+    STATUS_FILE.write_text(json.dumps({"last_run": iso(NOW), "seconds": round(time.time() - start, 1), "mode": MODE, "boards_listed": sum(len(COMPANIES.get(k, [])) for k in wanted), "boards_dead_skipped": sum(1 for v in dead.values() if v >= DEAD_AFTER), "boards_tried": done,
         "boards_scanned": scanned, "boards_failed": failed, "jobs_read": total, "jobs_matching_filters": matched,
         "new_this_run": len(added), "in_feed": len(jobs)}, indent=1))
     print(STATUS_FILE.read_text())
