@@ -10,7 +10,7 @@ COMPANIES = json.loads((ROOT / "config/companies.json").read_text())
 SEEN_FILE, FEED_FILE, STATUS_FILE = (ROOT / "feed" / n for n in ("seen.json", "new_jobs.json", "status.json"))
 NOW = datetime.now(timezone.utc)
 KEEP_DAYS, FIRST_SCAN_DAYS, MAX_AGE_DAYS = 7, 3, 14
-DEADLINE = time.time() + 20 * 60
+DEADLINE = time.time() + 12 * 60
 DEAD_AFTER = 3
 
 def iso(d): return d.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -125,6 +125,8 @@ def scan(item):
     try:
         return source, slug, FETCH[source](slug), None
     except urllib.error.HTTPError as e:
+        if e.code == 429 and source == "workday":
+            time.sleep(5)  # Workday asked us to slow down
         return source, slug, [], f"HTTP {e.code}"
     except Exception as e:
         return source, slug, [], type(e).__name__
@@ -148,7 +150,7 @@ def main():
     with cf.ThreadPoolExecutor(max_workers=48) as pool:
         results = list(pool.map(scan, items))
     fast_seconds = round(time.time() - start, 1)
-    with cf.ThreadPoolExecutor(max_workers=24) as pool:
+    with cf.ThreadPoolExecutor(max_workers=6) as pool:
         wd_results = list(pool.map(scan, wd))
     results += wd_results
     wd_done = sum(1 for r in wd_results if r[3] != "skipped")
@@ -159,7 +161,7 @@ def main():
             continue
         if err:
             failed[err] = failed.get(err, 0) + 1
-            if err == "HTTP 404": dead[board] = dead.get(board, 0) + 1
+            if err in ("HTTP 404", "HTTP 422", "HTTP 401", "HTTP 403"): dead[board] = dead.get(board, 0) + 1
             continue
         dead.pop(board, None)
         scanned[source] += 1

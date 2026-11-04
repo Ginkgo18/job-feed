@@ -88,7 +88,12 @@
     "estimator",
     "field service",
     "job site",
-    "site manager"
+    "site manager",
+    "avp",
+    "managing",
+    "iv",
+    "svp",
+    "evp"
   ],
   "location_local": [
     "new york",
@@ -164,10 +169,7 @@
     "hauppauge"
   ],
   "workday_searches": [
-    "project coordinator",
-    "project manager",
-    "implementation coordinator",
-    "operations coordinator",
-    "operations associate"
+    "project",
+    "coordinator operations implementation"
   ]
 }
