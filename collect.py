@@ -68,7 +68,8 @@ def title_match(title):
 def area(j):
     loc = j["location"].lower()
     if has(loc, FILTERS["location_local"]): return "New York area"
-    if (j["remote_flag"] or has(loc, FILTERS["location_remote"])) and not has(loc, FILTERS["remote_exclude"]): return "Remote"
+    us_or_blank = not loc or has(loc, ["remote", "us", "usa", "united states"])
+    if ((j["remote_flag"] and us_or_blank) or has(loc, FILTERS["location_remote"])) and not has(loc, FILTERS["remote_exclude"]): return "Remote"
     return None
 
 def scan(item):
@@ -90,7 +91,7 @@ def main():
     known_boards = set(seen["boards"])
     items = [(s, b) for s, boards in COMPANIES.items() for b in boards]
     scanned, failed, total, matched, added = {k: 0 for k in FETCH}, {}, 0, 0, []
-    with cf.ThreadPoolExecutor(max_workers=24) as pool:
+    with cf.ThreadPoolExecutor(max_workers=48) as pool:
         results = list(pool.map(scan, items))
     for source, slug, jobs, err in results:
         board = f"{source}:{slug}"
