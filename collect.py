@@ -9,7 +9,7 @@ FILTERS = json.loads((ROOT / "config/filters.json").read_text())
 COMPANIES = json.loads((ROOT / "config/companies.json").read_text())
 SEEN_FILE, FEED_FILE, STATUS_FILE = (ROOT / "feed" / n for n in ("seen.json", "new_jobs.json", "status.json"))
 NOW = datetime.now(timezone.utc)
-KEEP_DAYS, FIRST_SCAN_DAYS = 7, 3
+KEEP_DAYS, FIRST_SCAN_DAYS, MAX_AGE_DAYS = 7, 3, 14
 
 def iso(d): return d.strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -58,7 +58,8 @@ def ashby(slug):
 
 FETCH = {"greenhouse": greenhouse, "lever": lever, "ashby": ashby}
 
-def has(text, terms): return any(t in text for t in terms)
+def has(text, terms):
+    return any(re.search(r"(?<![a-z0-9])" + re.escape(t.strip()) + r"(?![a-z0-9])", text) for t in terms)
 
 def title_match(title):
     t = f" {title.lower()} "
@@ -108,6 +109,7 @@ def main():
             if j["key"] in seen["jobs"]: continue
             seen["jobs"][j["key"]] = iso(NOW)
             posted = parse(j["posted_at"])
+            if posted and NOW - posted > timedelta(days=MAX_AGE_DAYS): continue
             if first_scan and not (posted and NOW - posted <= timedelta(days=FIRST_SCAN_DAYS)): continue
             added.append({**j, "area": a, "first_seen": iso(NOW), "first_scan": first_scan})
     cutoff = NOW - timedelta(days=KEEP_DAYS)
