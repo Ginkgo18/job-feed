@@ -188,7 +188,7 @@ def main():
             continue
         if err:
             failed[err] = failed.get(err, 0) + 1
-            if err in ("HTTP 404", "HTTP 422", "HTTP 401", "HTTP 403"): dead[board] = dead.get(board, 0) + 1
+            if err in ("HTTP 404", "HTTP 401", "HTTP 403"): dead[board] = dead.get(board, 0) + 1
             continue
         dead.pop(board, None)
         scanned[source] += 1
