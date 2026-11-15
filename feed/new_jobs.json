@@ -1,6 +1,22 @@
 {
  "jobs": [
   {
+   "key": "ashby:clera:74cc703f-b106-476b-965c-5c2e62079d3f",
+   "source": "ashby",
+   "board": "clera",
+   "title": "Data Operations Associate, Expert Talent Pool",
+   "company": "clera",
+   "location": "remote",
+   "url": "https://jobs.ashbyhq.com/Clera/74cc703f-b106-476b-965c-5c2e62079d3f",
+   "remote_flag": false,
+   "posted_at": "2026-11-15T14:08:02Z",
+   "date_kind": "published_at",
+   "area": "Remote",
+   "first_seen": "2026-11-15T17:49:52Z",
+   "first_scan": false,
+   "description": "ABOUT THE ROLE\nJoin a network of data operations specialists supporting human-data projects for AI research. You will source, curate, and validate datasets that help improve the quality of AI systems, with projects matched to your background.\nWHAT YOU'LL DO\n - Source and collect documents, images, audio, or video according to project specifications, including capturing new media when needed.\n - Sort, de-duplicate, tag, and filter datasets against quality standards.\n - Generate synthetic examples to specification and validate them against labeling guidelines.\n - Review and adjudicate annotations, identifying work as correct, incorrect, or unclear.\n - Run calibration and audit rounds to support consistency across annotators.\n - Help write and refine labeling guidelines with clear, practical examples.\nWHAT WE'RE LOOKING FOR\n - Under five years of hands-on experience in data operations, annotation quality assurance, dataset work, or a related detail-focused role.\n - Experience in data, quality assurance, research assistance, operations, or content review, or a degree in a data-related field such as statistics, linguistics, information science, computer science, library science, or GIS.\n - Experience sourcing, collecting, cleaning, or curating datasets and checking work against written guidelines or specifications.\n - Comfortable using Excel or Google Sheets and web-based tools.\n - Experience with annotation or data platforms such as Label Studio, Labelbox, CVAT, Scale, Remotasks, or Appen is a plus.\n - AI data project experience, including labeling, evaluations, synthetic data, or guideline writing, is valued. Additional language fluency is also a plus.\n - Strong attention to detail and clear written English.\nCOMPENSATION & BENEFITS\nCompensation is $20 to $40 per hour, depending on project, field, and experience level. Payment is for hours worked.\nLOCATION\nFully remote. Projects may last from one week to several months."
+  },
+  {
    "key": "greenhouse:strivepharmacy:5295062007",
    "source": "greenhouse",
    "board": "strivepharmacy",
