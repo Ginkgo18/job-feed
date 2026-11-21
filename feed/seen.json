@@ -10050,7 +10050,7 @@
 "ashby:pacificfusion": 3,
 "ashby:pageport": 3,
 "ashby:pahdo": 3,
-"ashby:palettelabs": 2,
+"ashby:palettelabs": 3,
 "ashby:parable": 3,
 "ashby:paradigm-ai": 3,
 "ashby:parallel-biosystems": 3,
@@ -12003,7 +12003,7 @@
 "greenhouse:leanix": 3,
 "greenhouse:leanixjobs": 3,
 "greenhouse:learfieldimgcollege": 3,
-"greenhouse:learningequality": 2,
+"greenhouse:learningequality": 3,
 "greenhouse:leaseweb": 3,
 "greenhouse:leddartech": 3,
 "greenhouse:ledgerinvesting": 3,
@@ -16251,6 +16251,7 @@
 "ashby:glimpse:dd897a33-2c29-4524-960c-f9bd721242cd": "2026-11-04T19:48:12Z",
 "ashby:greenlitecareers:de3d8530-356f-41ae-9be3-83444ff8cdd7": "2026-11-04T19:48:12Z",
 "ashby:gridunity:03dd97e8-56e2-4b14-a5b8-f5305fa997a7": "2026-11-04T19:48:12Z",
+"ashby:gridunity:e8a5619f-aaca-42e6-9536-8aef56dd3b9f": "2026-11-21T02:29:17Z",
 "ashby:handshake:d547e216-2ca7-4087-9d57-bbce9f5bd6b4": "2026-11-04T19:28:36Z",
 "ashby:hang:36a6254d-b093-4eee-8c91-c0193ab17c69": "2026-11-04T19:48:12Z",
 "ashby:hanover-park:50e73bc6-c6fc-466e-9236-fdf29c3f3ce3": "2026-11-04T19:48:12Z",
@@ -16474,6 +16475,7 @@
 "greenhouse:dynamisinc:4708572006": "2026-11-04T19:48:12Z",
 "greenhouse:echodynecorp:4603405006": "2026-11-04T19:48:12Z",
 "greenhouse:elationhealth:8335330": "2026-11-04T19:48:12Z",
+"greenhouse:energysolutions:5298184007": "2026-11-21T02:29:17Z",
 "greenhouse:enigmaio:6803803": "2026-11-04T19:48:12Z",
 "greenhouse:ensco:5415468008": "2026-11-04T19:48:12Z",
 "greenhouse:enterrasolutions:5238990007": "2026-11-04T19:48:12Z",
@@ -16513,6 +16515,7 @@
 "greenhouse:gatherai:5268357007": "2026-11-04T19:48:12Z",
 "greenhouse:gemechanicalasp:5385905008": "2026-11-04T19:48:12Z",
 "greenhouse:gitlab:8638246002": "2026-11-04T19:28:36Z",
+"greenhouse:givewell:5491447008": "2026-11-21T02:29:17Z",
 "greenhouse:gomotive:8499079002": "2026-11-04T19:48:12Z",
 "greenhouse:gomotive:8672520002": "2026-11-04T19:48:12Z",
 "greenhouse:gomotive:8949125002": "2026-11-20T21:16:07Z",
@@ -16943,6 +16946,7 @@
 "lever:wachter:5c690cb4-72f1-4088-9df7-5d32069d9966": "2026-11-04T19:48:12Z",
 "lever:wachter:d99249a1-6689-4c33-9ad1-91342b5e97dc": "2026-11-04T19:48:12Z",
 "lever:wearedream:9be878cb-9d26-41e6-8ddb-578973e25062": "2026-11-04T19:48:12Z",
-"lever:wpromote:3188baad-6cc6-43d5-926d-cf42c5e864b1": "2026-11-04T19:48:12Z"
+"lever:wpromote:3188baad-6cc6-43d5-926d-cf42c5e864b1": "2026-11-04T19:48:12Z",
+"lever:wwprosolutions:72a53b3e-703d-439a-98fa-de4a15f67533": "2026-11-21T02:29:17Z"
 }
 }
