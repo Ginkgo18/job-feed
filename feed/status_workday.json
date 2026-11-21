@@ -1,6 +1,6 @@
 {
- "last_run": "2026-11-21T19:06:00Z",
- "seconds": 1940.0,
+ "last_run": "2026-11-21T23:08:19Z",
+ "seconds": 1693.0,
  "mode": "workday",
  "boards_listed": 12884,
  "boards_dead_skipped": 395,
@@ -9,13 +9,12 @@
   "workday": 5660
  },
  "boards_failed": {
-  "HTTP 422": 6049,
+  "HTTP 422": 6141,
   "HTTP 410": 2,
-  "JSONDecodeError": 2,
-  "HTTP 429": 772,
+  "HTTP 429": 682,
   "HTTP 502": 4
  },
- "jobs_read": 68765,
+ "jobs_read": 68750,
  "jobs_matching_filters": 121,
  "new_this_run": 0,
  "with_description": 68,
