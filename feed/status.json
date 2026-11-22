@@ -1,9 +1,9 @@
 {
- "last_run": "2026-11-21T19:28:00Z",
- "seconds": 83.2,
+ "last_run": "2026-11-22T00:26:25Z",
+ "seconds": 71.3,
  "mode": "fast",
  "boards_listed": 16052,
- "boards_dead_skipped": 6650,
+ "boards_dead_skipped": 6653,
  "boards_tried": 9402,
  "boards_scanned": {
   "greenhouse": 3999,
@@ -14,7 +14,7 @@
   "HTTP 404": 3,
   "HTTP 429": 1040
  },
- "jobs_read": 221232,
+ "jobs_read": 221068,
  "jobs_matching_filters": 472,
  "new_this_run": 0,
  "with_description": 68,
