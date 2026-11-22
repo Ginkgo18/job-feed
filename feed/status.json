@@ -1,20 +1,20 @@
 {
- "last_run": "2026-11-22T00:26:25Z",
- "seconds": 71.3,
+ "last_run": "2026-11-22T08:08:36Z",
+ "seconds": 64.8,
  "mode": "fast",
  "boards_listed": 16052,
  "boards_dead_skipped": 6653,
- "boards_tried": 9402,
+ "boards_tried": 9399,
  "boards_scanned": {
-  "greenhouse": 3999,
+  "greenhouse": 3994,
   "lever": 1873,
-  "ashby": 2487
+  "ashby": 2485
  },
  "boards_failed": {
-  "HTTP 404": 3,
-  "HTTP 429": 1040
+  "HTTP 404": 8,
+  "HTTP 429": 1039
  },
- "jobs_read": 221068,
+ "jobs_read": 220829,
  "jobs_matching_filters": 472,
  "new_this_run": 0,
  "with_description": 68,
